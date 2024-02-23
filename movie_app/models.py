@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+
 
 
 class Director(models.Model):
@@ -19,6 +21,9 @@ class Movie(models.Model):
 class Review(models.Model):
     text = models.TextField()
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    stars = models.IntegerField(default=1, choices=[(i, i * '*')for i in range(6)])
 
     def __str__(self):
         return f'Review for {self.movie.title}'
+
+
