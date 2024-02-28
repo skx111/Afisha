@@ -1,10 +1,12 @@
 from rest_framework.decorators import api_view
+from rest_framework import generics
 from rest_framework.response import Response
 from .models import Movie, Director, Review
 from .serializers import MovieSerializer, DirectorSerializer, ReviewSerializer
 from rest_framework import status
 from django.db.models import Avg, Count
 from django.http import JsonResponse
+
 
 
 @api_view(['GET', 'POST'])
@@ -34,6 +36,15 @@ def director_detail_api_view(request, id):
         queryset.delete()
         return Response(status=204)
 
+
+class DirectorListCreate(generics.ListCreateAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+
+class DirectorRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+
 @api_view(['GET'])
 def movie_list_api_view(request):
     if request.method == 'GET':
@@ -61,6 +72,14 @@ def movie_detail_api_view(request, id):
         queryset.delete()
         return Response(status=204)
 
+class MovieListCreate(generics.ListCreateAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+
+class MovieRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+
 @api_view(['GET'])
 def review_list_api_view(request):
     if request.method == 'GET':
@@ -87,6 +106,14 @@ def review_detail_api_view(request):
     elif request.method == 'DELETE':
         queryset.delete()
         return Response(status=204)
+
+class ReviewListCreate(generics.ListCreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+class ReviewRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
 
 
 
