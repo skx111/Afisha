@@ -5,7 +5,8 @@ from .models import Movie, Director, Review
 from .serializers import MovieSerializer, DirectorSerializer, ReviewSerializer
 from rest_framework import status
 from django.db.models import Avg, Count
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
 
 
 
@@ -143,3 +144,73 @@ def movie_reviews(request):
 def directors_list(request):
     directors = Director.objects.annotate(movies_count=Count('movie')).values('name', 'movies_count')
     return JsonResponse({'directors': list(directors)})
+
+
+
+def validate_director_id(func):
+    def wrapper(request, *args, **kwargs):
+        director_id = kwargs.get('id')
+        if director_id is None:
+            return HttpResponseBadRequest('Director ID is required')
+        if not Director.objects.filter(pk=director_id).exists():
+            return HttpResponseBadRequest('Invalid Director ID')
+        return func(request, *args, **kwargs)
+    return wrapper
+
+def validate_movie_id(func):
+    def wrapper(request, *args, **kwargs):
+        movie_id = kwargs.get('id')
+        if movie_id is None:
+            return HttpResponseBadRequest('Movie ID is required')
+        if not Movie.objects.filter(pk=movie_id).exists():
+            return HttpResponseBadRequest('Invalid Movie ID')
+        return func(request, *args, **kwargs)
+    return wrapper
+
+def validate_review_id(func):
+    def wrapper(request, *args, **kwargs):
+        review_id = kwargs.get('id')
+        if review_id is None:
+            return HttpResponseBadRequest('Review ID is required')
+        if not Review.objects.filter(pk=review_id).exists():
+            return HttpResponseBadRequest('Invalid Review ID')
+        return func(request, *args, **kwargs)
+    return wrapper
+
+def directors_list(request):
+    directors = Director.objects.annotate(movies_count=Count('movie')).values('name', 'movies_count')
+    return JsonResponse({'directors': list(directors)})
+
+@validate_director_id
+def director_detail(request, id):
+    director = get_object_or_404(Director, pk=id)
+    data = {'id': director.id, 'name': director.name}
+    return JsonResponse(data)
+
+def movies_list(request):
+    movies = Movie.objects.all()
+    data = [{'id': movie.id, 'title': movie.title} for movie in movies]
+    return JsonResponse({'movies': data})
+
+@validate_movie_id
+def movie_detail(request, id):
+    movie = get_object_or_404(Movie, pk=id)
+    data = {
+        'id': movie.id,
+        'title': movie.title,
+        'description': movie.description,
+        'duration': movie.duration,
+        'director': movie.director.name
+    }
+    return JsonResponse(data)
+
+def reviews_list(request):
+    reviews = Review.objects.all()
+    data = [{'id': review.id, 'text': review.text} for review in reviews]
+    return JsonResponse({'reviews': data})
+
+@validate_review_id
+def review_detail(request, id):
+    review = get_object_or_404(Review, pk=id)
+    data = {'id': review.id, 'text': review.text}
+    return JsonResponse(data)
