@@ -38,9 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework.authtoken',
     'rest_framework',
-    'movie_app'
+    'movie_app',
+    'users'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_CONFIRMATION_CLASSES':
+        'rest_framework_authentication.TokenAuthentication',
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
